@@ -6,6 +6,9 @@ import com.oybek.ekbts.entities.TramStop;
 import com.sun.javafx.geom.Vec2d;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 public class RequestController {
 
@@ -31,5 +34,17 @@ public class RequestController {
         result.setTramStopName(tramStop.getName() + " " + tramStop.getDirection());
 
         return result;
+    }
+    @GetMapping(value = "/getNearestInRadius")
+    public List<Result> getNearestInRadius (@RequestParam("latitude") double latitude
+            , @RequestParam("longitude") double longitude, @RequestParam("radius") double radius){
+        List<TramStop> tramStops = engine.getNearestInRadius(new Vec2d(latitude,longitude),radius);
+        List<Result> results = new ArrayList<>();
+        for(TramStop tramStop: tramStops){
+            Result result = ettu.getInfo(tramStop);
+            result.setTramStopName(tramStop.getName() + " " + tramStop.getDirection());
+            results.add(result);
+        }
+        return results;
     }
 }
