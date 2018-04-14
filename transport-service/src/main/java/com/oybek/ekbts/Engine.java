@@ -51,7 +51,7 @@ public class Engine {
     }
 
     private double distance(double lat1, double lat2, double lon1,
-                                  double lon2) {
+                            double lon2) {
 
         final int R = 6371; // Radius of the earth
 
@@ -67,7 +67,6 @@ public class Engine {
         return Math.sqrt(distance);
     }
 
-
     public List<TramStop> getNearestInRadius(Vec2d coord, double radius) {
         if (tramStops.size() == 0) {
             System.out.println("No single tram stop given");
@@ -81,17 +80,13 @@ public class Engine {
             }
         }
         List<TramStop> nearestInRadius = new ArrayList<>();
-        nearestInRadius.add(nearestTramStop);
         for (TramStop currentTramStop : tramStops) {
-            if (currentTramStop.equals(nearestTramStop))
-                continue;
             if (distance(currentTramStop.getLatitude(), nearestTramStop.getLatitude(), currentTramStop.getLongitude(), nearestTramStop.getLongitude()) < radius) {
                 nearestInRadius.add(currentTramStop);
             }
         }
         return nearestInRadius;
     }
-
 
     public File getResourceFile(String fileName) {
         //Get file from resources folder

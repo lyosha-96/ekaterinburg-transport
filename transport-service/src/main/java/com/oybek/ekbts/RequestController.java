@@ -27,23 +27,26 @@ public class RequestController {
 
     @GetMapping(value = "/get")
     public Result get(@RequestParam("latitude") double latitude
-            , @RequestParam("longitude") double longitude ) {
-        TramStop tramStop = engine.getNearest( new Vec2d( latitude, longitude ) );
+            , @RequestParam("longitude") double longitude) {
+        TramStop tramStop = engine.getNearest(new Vec2d(latitude, longitude));
 
         Result result = ettu.getInfo(tramStop);
         result.setTramStopName(tramStop.getName() + " " + tramStop.getDirection());
 
         return result;
     }
+
     @GetMapping(value = "/getNearestInRadius")
-    public List<Result> getNearestInRadius (@RequestParam("latitude") double latitude
-            , @RequestParam("longitude") double longitude, @RequestParam("radius") double radius){
-        List<TramStop> tramStops = engine.getNearestInRadius(new Vec2d(latitude,longitude),radius);
+    public List<Result> getNearestInRadius(@RequestParam("latitude") double latitude
+            , @RequestParam("longitude") double longitude, @RequestParam("radius") double radius) {
+        List<TramStop> tramStops = engine.getNearestInRadius(new Vec2d(latitude, longitude), radius);
         List<Result> results = new ArrayList<>();
-        for(TramStop tramStop: tramStops){
-            Result result = ettu.getInfo(tramStop);
-            result.setTramStopName(tramStop.getName() + " " + tramStop.getDirection());
-            results.add(result);
+        if (tramStops != null) {
+            for (TramStop tramStop : tramStops) {
+                Result result = ettu.getInfo(tramStop);
+                result.setTramStopName(tramStop.getName() + " " + tramStop.getDirection());
+                results.add(result);
+            }
         }
         return results;
     }

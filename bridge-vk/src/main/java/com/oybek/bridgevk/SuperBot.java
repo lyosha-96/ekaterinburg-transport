@@ -14,6 +14,7 @@ public class SuperBot {
     private QueueController queueController;
 
     private String url = "http://localhost:8888/get?latitude=%f&longitude=%f";
+    private String urlInRadius = "http://localhost:8888/getNearestInRadius?latitude=%f&longitude=%f&radius=100";
 
     public SuperBot(QueueController queueController) {
         this.queueController = queueController;
