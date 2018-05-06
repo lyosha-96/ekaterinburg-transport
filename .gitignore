@@ -22,3 +22,8 @@ gradle-app.setting
 
 **/out
 
+# Autentification data
+/pinger-bot/.authdata.json
+
+# Logs
+/pinger-bot/pinger-bot.log
