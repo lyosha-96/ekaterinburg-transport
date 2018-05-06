@@ -6,52 +6,60 @@ import threading
 
 logging.basicConfig(filename="pinger-bot.log", level=logging.INFO, format="%(asctime)s:%(levelname)s:%(name)s:%(message)s")
 
-notifyState = False
 checkTimer = 0
 
 def notifyDevelopers(vkapi, discussionID, notification):
-    global notifyState
     logging.info("notifyDevelopers: Bot has fallen")
     print("notifyDevelopers: Bot has fallen")
-    vkapi.messages.send(chat_id=66, message=notification)
-    notifyState = True
+    vkapi.messages.send(chat_id=discussionID, message=notification)
 
+def getResponse(vkapi, botID):
+    response = vkapi.messages.get(time_offset=1)
+    if response['items']:
+        userID = response['items'][0]['user_id']
+        readState = response['items'][0]['read_state']             
+        if userID == int(botID) and readState == 0: # если написал наш бот
+            logging.info("Bot alive")
+            print("Bot alive")
+            return True
+        else:
+            logging.info("Bot not alive")
+            print("Bot not alive")
+            return False    
+            
 
-def sender(vkapi, botID, waitTime=300):
-    global notifyState
-    while notifyState == False:
+def sender(vkapi, botID, waitTime=10):
+    while True:
         logging.info("sender: Are you alive?")
         print("sender: Are you alive?")
         vkapi.messages.send(user_id=botID, message='Ты живой?')
         time.sleep(waitTime)
 
-def receiver(vkapi, botID, discussionID, waitTime=300):
+def receiver(vkapi, botID, discussionID, waitTime=10):
     global checkTimer
-    global notifyState
-    while notifyState == False:
+    while True:
+        """
         response = vkapi.messages.get(time_offset=1)
         if response['items']:
             userID = response['items'][0]['user_id']
             readState = response['items'][0]['read_state']
-
-            print(userID, response['items'][0]['body'])
-            logging.info("%s: " + response['items'][0]['body'], userID)
-
-            if userID != int(botID) and readState == 0:
-                print('messages.send to:', userID)
-                logging.info("messages.send to: %s", userID)
-                # vkapi.messages.send(user_id=userID, message='Здравствуйте! Я бот, я ответил потому, что меня тестируют аккаунте Айнура. Пока!')
              
             if userID == int(botID) and readState == 0:
                 checkTimer = 0
                 logging.info("Bot alive")
                 print("Bot alive")
-
-        elif checkTimer > (waitTime + 10):
-            notifyDevelopers(vkapi, discussionID, 'Привет парни. По ходу бот упал. Посмотрите пожалуйста. Не забудьте меня перезапустить.')
-            logging.info("checkTimer > waitTime : notify developers")
-            print("checkTimer > waitTime : notify developers")
+        """
+        if getResponse(vkapi, botID):
+            checkTimer = 0
             
+        elif checkTimer > (waitTime + 10):
+            while not getResponse(vkapi, botID):
+                notifyDevelopers(vkapi, discussionID, '☠ Ваш бот не отвечает, походу он упал ☠')
+                logging.info("checkTimer > waitTime : notify developers")
+                print("checkTimer > waitTime : notify developers - ", checkTimer)
+                time.sleep(5)
+            checkTimer = 0
+
         time.sleep(1)
         checkTimer = checkTimer + 1
         print('checkTimer:', checkTimer)
