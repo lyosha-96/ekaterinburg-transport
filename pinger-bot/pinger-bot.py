@@ -18,7 +18,7 @@ def getResponse(vkapi, botID):
     if response['items']:
         userID = response['items'][0]['user_id']
         readState = response['items'][0]['read_state']             
-        if userID == int(botID) and readState == 0: # если написал наш бот
+        if userID == int(botID) and readState == 0: # if this is my bot
             logging.info("Bot alive")
             print("Bot alive")
             return True
@@ -28,27 +28,16 @@ def getResponse(vkapi, botID):
             return False    
             
 
-def sender(vkapi, botID, waitTime=10):
+def sender(vkapi, botID, waitTime=300):
     while True:
         logging.info("sender: Are you alive?")
         print("sender: Are you alive?")
         vkapi.messages.send(user_id=botID, message='Ты живой?')
         time.sleep(waitTime)
 
-def receiver(vkapi, botID, discussionID, waitTime=10):
+def receiver(vkapi, botID, discussionID, waitTime=300):
     global checkTimer
     while True:
-        """
-        response = vkapi.messages.get(time_offset=1)
-        if response['items']:
-            userID = response['items'][0]['user_id']
-            readState = response['items'][0]['read_state']
-             
-            if userID == int(botID) and readState == 0:
-                checkTimer = 0
-                logging.info("Bot alive")
-                print("Bot alive")
-        """
         if getResponse(vkapi, botID):
             checkTimer = 0
             
@@ -57,7 +46,7 @@ def receiver(vkapi, botID, discussionID, waitTime=10):
                 notifyDevelopers(vkapi, discussionID, '☠ Ваш бот не отвечает, походу он упал ☠')
                 logging.info("checkTimer > waitTime : notify developers")
                 print("checkTimer > waitTime : notify developers - ", checkTimer)
-                time.sleep(5)
+                time.sleep(300)
             checkTimer = 0
 
         time.sleep(1)
