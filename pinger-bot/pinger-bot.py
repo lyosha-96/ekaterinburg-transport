@@ -6,52 +6,58 @@ import threading
 
 logging.basicConfig(filename="pinger-bot.log", level=logging.INFO, format="%(asctime)s:%(levelname)s:%(name)s:%(message)s")
 
-checkTimer = 0
-
 def notifyDevelopers(vkapi, discussionID, notification):
     logging.info("notifyDevelopers: Bot has fallen")
     print("notifyDevelopers: Bot has fallen")
     vkapi.messages.send(chat_id=discussionID, message=notification)
+
 
 def getResponse(vkapi, botID):
     response = vkapi.messages.get(time_offset=1)
     if response['items']:
         userID = response['items'][0]['user_id']
         readState = response['items'][0]['read_state']             
-        if userID == int(botID) and readState == 0: # if this is my bot
-            logging.info("Bot alive")
-            print("Bot alive")
+        if userID == int(botID) and readState == 0:    # if this is my bot
+            logging.info("getResponse: Bot alive")
+            print("getResponse: Bot alive")
             return True
         else:
-            logging.info("Bot not alive")
-            print("Bot not alive")
-            return False    
-            
+            logging.info("getResponse: Bot not alive")
+            print("getResponse: Bot not alive")
+            return False
 
-def sender(vkapi, botID, waitTime=300):
+
+# thread for sender
+def sender(vkapi, botID, waitTime=150):
     while True:
         logging.info("sender: Are you alive?")
         print("sender: Are you alive?")
         vkapi.messages.send(user_id=botID, message='Ты живой?')
         time.sleep(waitTime)
 
-def receiver(vkapi, botID, discussionID, waitTime=300):
-    global checkTimer
+
+# thread for receiver
+def receiver(vkapi, botID, discussionID, waitTime=150):
+    checkTimer = 0
     while True:
         if getResponse(vkapi, botID):
             checkTimer = 0
             
-        elif checkTimer > (waitTime + 10):
+        elif checkTimer > waitTime:            
+            notifyTimer = 0
             while not getResponse(vkapi, botID):
-                notifyDevelopers(vkapi, discussionID, '☠ Ваш бот не отвечает, походу он упал ☠')
-                logging.info("checkTimer > waitTime : notify developers")
-                print("checkTimer > waitTime : notify developers - ", checkTimer)
-                time.sleep(300)
+                if notifyTimer > waitTime:
+                    notifyTimer = 0
+                    notifyDevelopers(vkapi, discussionID,
+                                     '☠ Ваш бот не отвечает, по ходу он #упал ☠')
+                    logging.info("receiver: checkTimer > waitTime : notify developers")
+                    print("receiver: checkTimer > waitTime : notify developers - ",
+                          checkTimer)
+                notifyTimer += 1
+                time.sleep(1)
             checkTimer = 0
-
         time.sleep(1)
-        checkTimer = checkTimer + 1
-        print('checkTimer:', checkTimer)
+        checkTimer += 1
 
 
 def main():
